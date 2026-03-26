@@ -1,0 +1,28 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/detect-project-state.sh 2>/dev/null || echo 'MODE: ASK\nACTION: Project state detection script not found. Ask the user what they want to do.'",
+            "timeout": 15,
+            "statusMessage": "Detecting project phase..."
+          }
+        ]
+      },
+      {
+        "matcher": "resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/hooks/detect-project-state.sh 2>/dev/null || echo 'MODE: CONTINUE'",
+            "timeout": 15,
+            "statusMessage": "Re-detecting project phase..."
+          }
+        ]
+      }
+    ]
+  }
+}

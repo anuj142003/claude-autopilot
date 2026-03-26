@@ -1,0 +1,24 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local Claude settings (machine-specific)
+.claude/settings.local.json
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Generated artifacts (users generate these locally)
+_bmad-output/
+*.bak
+
+# Temp files
+/tmp/
+*.tmp
