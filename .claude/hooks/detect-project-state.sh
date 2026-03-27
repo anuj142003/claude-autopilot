@@ -225,8 +225,10 @@ if [ -d "$HOME/.claude/agents" ]; then
 fi
 
 # ECC skills: check global and project-local
-if [ -d "$HOME/.claude/skills" ] || [ -d ".claude/skills" ]; then
+if [ -d "$HOME/.claude/skills" ]; then
     ECC_SKILLS_PATH="$HOME/.claude/skills"
+elif [ -d ".claude/skills" ]; then
+    ECC_SKILLS_PATH=".claude/skills"
 fi
 
 echo "── Framework Discovery ──"
@@ -243,7 +245,7 @@ fi
 
 if [ -n "$ECC_AGENTS_PATH" ]; then
     echo "  ECC agents path:           $ECC_AGENTS_PATH/*.md"
-    ECC_AGENT_COUNT=$(ls "$ECC_AGENTS_PATH"/*.md 2>/dev/null | wc -l | tr -d ' ')
+    ECC_AGENT_COUNT=$(find "$ECC_AGENTS_PATH" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
     echo "  ECC agents available:      $ECC_AGENT_COUNT"
 else
     echo "  ECC agents path:           (not found)"
