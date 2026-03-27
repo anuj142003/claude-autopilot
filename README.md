@@ -1,10 +1,10 @@
 <p align="center">
   <h1 align="center">claude-autopilot</h1>
   <p align="center">
-    <strong>Discovers and invokes the right BMAD workflow or ECC agent based on your project's lifecycle phase</strong>
+    <strong>Hands-free orchestration for AI-assisted development</strong>
   </p>
   <p align="center">
-    A thin orchestration layer that sits on top of <a href="https://github.com/affaan-m/everything-claude-code">everything-claude-code</a> and <a href="https://github.com/bmad-code-org/BMAD-METHOD">BMAD-METHOD</a> — detecting your project phase, discovering available commands at runtime, and routing to real workflows with cost-optimized model selection.
+    Automatically routes between <a href="https://github.com/affaan-m/everything-claude-code">everything-claude-code</a> (planning & implementation optimization) and <a href="https://github.com/bmad-code-org/BMAD-METHOD">BMAD-METHOD</a> (structured agile workflows) — so you never have to think about which tool to invoke.
   </p>
 </p>
 
@@ -12,7 +12,7 @@
   <a href="#quick-start">Quick Start</a> &bull;
   <a href="#how-it-works">How It Works</a> &bull;
   <a href="#phase-detection">Phase Detection</a> &bull;
-  <a href="#cost-optimization">Cost Optimization</a> &bull;
+  <a href="#example-project">Example</a> &bull;
   <a href="#configuration">Configuration</a> &bull;
   <a href="#contributing">Contributing</a>
 </p>
@@ -21,9 +21,9 @@
 
 ## What is claude-autopilot?
 
-**claude-autopilot is NOT a fork or bundle of ECC or BMAD.** It does not include either framework — you install them separately. What it provides is a thin **orchestration layer** that sits on top of both and automatically routes to the right tools based on where your project is in its lifecycle.
+**claude-autopilot is NOT a fork or bundle of ECC or BMAD.** It does not include either framework — you install them separately. What it provides is a thin **orchestration layer** that sits on top of both and automatically routes Claude's behavior based on where your project is in its lifecycle.
 
-Think of it like a traffic controller: ECC and BMAD are the roads, and claude-autopilot decides which road to take at any given moment — discovering available commands at runtime rather than maintaining a static registry.
+Think of it like a traffic controller: ECC and BMAD are the roads, and claude-autopilot decides which road Claude should take at any given moment.
 
 ## About the Frameworks
 
@@ -34,18 +34,17 @@ Think of it like a traffic controller: ECC and BMAD are the roads, and claude-au
 - **Rules** — language-specific coding standards (Python, TypeScript, Go, etc.)
 - **Hooks** — auto-formatting, type-checking, security scanning on every code change
 - **Skills** — TDD workflows, code review, continuous learning
-- **Agents** — model-optimized sub-agents (opus for planning, sonnet for implementation, haiku for docs)
+- **Agents** — specialized sub-agents for exploration, testing, and review
 
 ECC makes Claude write better code, but it doesn't help you figure out *what* to build.
 
 ### BMAD-METHOD
 
-[BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD) by Brian (BMad) Madison is a structured agile workflow system for **planning and design**. It installs globally to `~/.bmad/` and provides:
+[BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD) by Brian (BMad) Madison is a structured agile workflow system for **planning and design**. It installs per-project and provides:
 
+- **Agent personas** — Mary (Analyst), John (PM), Winston (Architect), Bob (Scrum Master), Quinn (QA)
 - **Workflows** — guided brainstorming, requirements elicitation, architecture design, story creation
-- **Slash commands** — 60+ discoverable commands with manifests (`bmad-skill-manifest.yaml`)
 - **Document templates** — product briefs, PRDs, architecture docs, user stories with acceptance criteria
-- **Test architecture** — TEA module for test strategy and ATDD
 
 BMAD ensures you build the *right thing*, but it doesn't optimize the AI agent during coding.
 
@@ -56,10 +55,10 @@ Neither framework knows about the other. If you install both, you need to manual
 ## What claude-autopilot Does
 
 1. **Detects** your project's lifecycle phase on every session start
-2. **Discovers** available BMAD workflows and ECC agents at runtime by scanning manifest files and agent directories
-3. **Routes** to real commands with cost-optimized model selection — BMAD workflows for planning, ECC agents for building
+2. **Routes** Claude's behavior to the right framework automatically
+3. **Transitions** between planning and implementation as your project progresses
 
-You just type what you want. The orchestrator finds and invokes the right tool.
+You just type what you want. Claude figures out the rest.
 
 ## Quick Start
 
@@ -112,7 +111,7 @@ claude
 
 ## How It Works
 
-Three layers work together to create automatic discovery and routing:
+Three mechanisms work together to create automatic routing:
 
 ```
 Session Start
@@ -123,40 +122,40 @@ Session Start
      |                   Scans for:
      |                   - BMAD artifacts (PRD, architecture, stories)
      |                   - Source code & tests
-     |                   - Framework install paths
+     |                   - Git state
      |                        |
      v                        v
-[CLAUDE.md]  <────── Phase + Discovery Paths
-     |                (phase, BMAD manifest paths, ECC agent paths)
+[CLAUDE.md]  <────── Phase Detection Result
+     |                (IDEATION / PLANNING / BUILDING / etc.)
      |
      v
-[Discovery Protocol]
+[Conditional Routing]
      |
-     ├── Planning phases ──> Discover BMAD workflows
-     |                       (search manifests, invoke via Skill tool)
+     ├── Planning phases ──> BMAD agent personas
+     |                       (Mary, John, Winston, Bob)
      |
-     └── Building phases ──> Delegate to ECC agents
-                             (model-optimized: opus/sonnet/haiku)
+     └── Build phases ────> ECC agents & hooks
+                            (code-reviewer, security, TDD)
 ```
 
 ### The Key Insight
 
-Claude Code's `SessionStart` hook runs a shell script that outputs the current phase **and** the paths where BMAD and ECC commands can be discovered. The `CLAUDE.md` teaches Claude a **discovery protocol** — how to search manifest files, match commands to the current need, and invoke them. This means the orchestrator never needs updating when BMAD or ECC add new commands.
+Claude Code's `SessionStart` hook can run any shell script and inject the output into Claude's context. The `CLAUDE.md` file is loaded every session and can contain conditional instructions using `<important if="...">` tags. Combined, these create a **context-aware autopilot** that adapts to your project's current state.
 
 ## Phase Detection
 
 The detection script inspects your project directory and determines the lifecycle phase:
 
-| Phase | Trigger | Action |
-|-------|---------|--------|
-| `IDEATION` | No artifacts, no source code | Discovers BMAD brainstorming/ideation workflows |
-| `ANALYSIS` | BMAD dir exists, no brief/PRD | Discovers BMAD analysis/research workflows |
-| `PLANNING` | Product brief exists, no PRD | Discovers BMAD PRD creation workflows |
-| `SOLUTIONING` | PRD exists, no architecture doc | Discovers BMAD architecture/design workflows |
-| `STORY_CREATION` | PRD + architecture, no stories | Discovers BMAD story/epic creation workflows |
-| `READY_TO_BUILD` | Stories exist, no source code | Delegates to ECC agents (planner, tdd-guide, code-reviewer) |
-| `BUILDING` | Stories + source code exist | Delegates to ECC agents with story acceptance criteria |
-| `BROWNFIELD` | Source code but no BMAD artifacts | Delegates to ECC agents; offers BMAD for retroactive planning |
+| Phase | Trigger | Claude's Behavior |
+|-------|---------|-------------------|
+| `IDEATION` | No artifacts, no source code | BMAD mode — Mary (Analyst) guides brainstorming |
+| `ANALYSIS` | BMAD dir exists, no brief/PRD | BMAD mode — continues analysis toward product brief |
+| `PLANNING` | Product brief exists, no PRD | BMAD mode — John (PM) guides PRD creation |
+| `SOLUTIONING` | PRD exists, no architecture doc | BMAD mode — Winston (Architect) guides design |
+| `STORY_CREATION` | PRD + architecture, no stories | BMAD mode — Bob (Scrum Master) creates stories |
+| `READY_TO_BUILD` | Stories exist, no source code | ECC mode — Plan → TDD → Implement → Review → Report |
+| `BUILDING` | Stories + source code exist | ECC mode — continues TDD with story acceptance criteria |
+| `BROWNFIELD` | Source code but no BMAD artifacts | ECC mode — offers BMAD if user wants structure |
 
 ### Artifact Convention
 
@@ -177,22 +176,6 @@ _bmad-output/
 
 The `CLAUDE.md` instructs Claude to save artifacts to these locations automatically.
 
-## Cost Optimization
-
-During BUILDING phases (where most tokens are spent), claude-autopilot delegates work to ECC agents that run on cost-appropriate models instead of doing everything in the main session:
-
-| Task | Delegated To | Model | Cost Tier |
-|------|-------------|-------|-----------|
-| Implementation planning | ECC planner agent | Opus | Premium (but scoped to planning only) |
-| Writing tests (TDD) | ECC tdd-guide agent | Sonnet | Standard |
-| Code review | ECC code-reviewer agent | Sonnet | Standard |
-| Security scanning | ECC security-reviewer agent | Sonnet | Standard |
-| Documentation updates | ECC doc-updater agent | Haiku | Economy |
-
-The main session acts as a **thin orchestrator** during building: read the story, decide which agent to dispatch, review the output, and report back. Bulk implementation work runs on sonnet/haiku rather than the main session's model, reducing cost without sacrificing quality.
-
-During PLANNING phases, BMAD workflows run interactively in the main session since they require back-and-forth user collaboration.
-
 ## Example Project
 
 The `examples/todo-app/` directory contains a starter project that demonstrates the full lifecycle. Clone it and try:
@@ -201,10 +184,10 @@ The `examples/todo-app/` directory contains a starter project that demonstrates 
 cd examples/todo-app
 claude
 # Say: "I want to build a simple todo app with user authentication"
-# Claude will detect IDEATION phase and discover BMAD planning workflows automatically
+# Claude will detect IDEATION phase and start BMAD planning automatically
 ```
 
-As you progress through planning phases, the detection script picks up new artifacts and transitions to the next phase. See the [example README](examples/todo-app/README.md) for a full walkthrough.
+As you progress through planning phases, the detection script picks up new artifacts and transitions Claude's behavior. See the [example README](examples/todo-app/README.md) for a full walkthrough.
 
 ## Configuration
 
@@ -214,39 +197,37 @@ Edit `.claude/hooks/detect-project-state.sh` to customize:
 
 - **File paths** — if your BMAD artifacts are in different locations
 - **Phase logic** — if you want different transition conditions
-- **Discovery paths** — if BMAD or ECC are installed in non-standard locations
 - **Additional checks** — add CI status, branch patterns, etc.
 
 ### Customizing Routing
 
 Edit `CLAUDE.md` to customize:
 
-- **Discovery protocol** — adjust how Claude searches for commands
-- **Routing rules** — change when Claude uses BMAD vs ECC
-- **Delegation patterns** — modify which agents handle which tasks
+- **Agent behavior** — adjust what Claude does in each phase
+- **Transition rules** — change when Claude switches between BMAD and ECC
 - **Team conventions** — add project-specific instructions
 
 ### Conflict Resolution
 
 | Conflict | Resolution |
 |----------|------------|
-| Code style (ECC) vs process (BMAD) | ECC rules for code quality, BMAD workflows for methodology |
-| Both have testing workflows | BMAD TEA for test strategy/architecture, ECC tdd-guide for test implementation |
-| Both have code review | BMAD for acceptance criteria validation, ECC code-reviewer for code quality |
+| Skills directory collision | BMAD uses `.claude/skills/bmad/`, ECC uses `.claude/skills/` — no overlap |
+| Both have TDD workflows | ECC for test execution, BMAD for test planning |
+| Fresh chat (BMAD) vs long sessions (ECC) | Fresh chats for planning, longer sessions for implementation |
 | Rules overlap | ECC rules are language-specific, BMAD is process-specific — they complement |
 
 ## Architecture
 
 ```
 claude-autopilot/
-  CLAUDE.md                              # Discovery protocol + routing rules + delegation instructions
-  install.sh                             # One-command installer with prerequisite detection
+  CLAUDE.md                              # Orchestrator brain — conditional routing instructions
+  install.sh                             # One-command installer with safety checks
   .claude/
     settings.json                        # SessionStart hook configuration
     hooks/
-      detect-project-state.sh            # Phase detection + framework discovery paths
+      detect-project-state.sh            # Project state detection script
     rules/
-      unified-orchestration.md           # Artifact conventions + routing rule reference
+      unified-orchestration.md           # Artifact conventions & conflict resolution
   examples/
     todo-app/                            # Full lifecycle example project
   docs/
@@ -256,16 +237,15 @@ claude-autopilot/
 
 ## Implementation Workflow
 
-When the project reaches the BUILDING phase, the orchestrator delegates to ECC agents following a strict workflow for every story:
+When the project reaches the BUILDING phase, Claude follows a strict 5-step workflow for every story:
 
-1. **Plan** — Dispatch ECC planner agent with story acceptance criteria
-2. **Write tests first** — Dispatch ECC tdd-guide agent for TDD (write failing tests first)
+1. **Plan** — Read the story's acceptance criteria and outline the approach
+2. **Write tests first** — TDD: write failing tests that match acceptance criteria
 3. **Implement** — Write minimal code to make tests pass
-4. **Review** — Dispatch ECC code-reviewer agent for code quality review
-5. **Security** — Dispatch ECC security-reviewer if the change touches auth, input handling, or APIs
-6. **Report** — Summarize what was built, show test output, flag any concerns
+4. **Review** — Self-review for security, edge cases, architecture adherence, and code quality
+5. **Report** — Summarize what was built, show test output, flag any concerns
 
-The main session orchestrates this pipeline; individual agents handle the heavy lifting on cost-appropriate models.
+Tests and review are mandatory — Claude won't skip them even for "simple" features.
 
 ## How Is This Different From...
 
@@ -273,7 +253,7 @@ The main session orchestrates this pipeline; individual agents handle the heavy 
 
 **...just using BMAD?** BMAD provides structure but doesn't optimize the AI agent during implementation. You get great plans but slower coding.
 
-**...using both manually?** You'd need to know which slash commands to run at each phase, handle conflicts between them, and remember to save artifacts in the right places. claude-autopilot discovers and routes automatically.
+**...using both manually?** You'd need to know which slash commands to run at each phase, handle conflicts between them, and remember to save artifacts in the right places. claude-autopilot does all of this automatically.
 
 ## Limitations
 
@@ -282,7 +262,6 @@ This is a **semi-automatic** system (~90% hands-free). Claude Code doesn't suppo
 - Claude may occasionally ask for confirmation at phase transitions (this is intentional)
 - Ambiguous user intent triggers a clarification question rather than a wrong guess
 - The system depends on artifacts being saved to conventional locations
-- Discovery adds a small number of tool calls (manifest reads) — mitigated by on-demand scanning
 
 ## Contributing
 

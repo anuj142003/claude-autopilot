@@ -209,56 +209,6 @@ echo "  Git branch:                $CURRENT_BRANCH"
 echo "  Recent commits:            $RECENT_COMMITS"
 echo ""
 
-# ── 5b. Detect framework installation paths ──────────────
-BMAD_PATH=""
-ECC_AGENTS_PATH=""
-ECC_SKILLS_PATH=""
-
-# BMAD discovery: check standard install location
-if [ -d "$HOME/.bmad/cache/external-modules" ]; then
-    BMAD_PATH="$HOME/.bmad/cache/external-modules"
-fi
-
-# ECC agent discovery: check global and project-local
-if [ -d "$HOME/.claude/agents" ]; then
-    ECC_AGENTS_PATH="$HOME/.claude/agents"
-fi
-
-# ECC skills: check global and project-local
-if [ -d "$HOME/.claude/skills" ]; then
-    ECC_SKILLS_PATH="$HOME/.claude/skills"
-elif [ -d ".claude/skills" ]; then
-    ECC_SKILLS_PATH=".claude/skills"
-fi
-
-echo "── Framework Discovery ──"
-if [ -n "$BMAD_PATH" ]; then
-    echo "  BMAD installed:            true"
-    echo "  BMAD manifests:            $BMAD_PATH/**/bmad-skill-manifest.yaml"
-    # Count available BMAD commands
-    BMAD_CMD_COUNT=$(find "$BMAD_PATH" -name "bmad-skill-manifest.yaml" 2>/dev/null | wc -l | tr -d ' ')
-    echo "  BMAD commands available:   $BMAD_CMD_COUNT"
-else
-    echo "  BMAD installed:            false"
-    echo "  BMAD manifests:            (not found — install with: npx bmad-method install)"
-fi
-
-if [ -n "$ECC_AGENTS_PATH" ]; then
-    echo "  ECC agents path:           $ECC_AGENTS_PATH/*.md"
-    ECC_AGENT_COUNT=$(find "$ECC_AGENTS_PATH" -maxdepth 1 -name "*.md" 2>/dev/null | wc -l | tr -d ' ')
-    echo "  ECC agents available:      $ECC_AGENT_COUNT"
-else
-    echo "  ECC agents path:           (not found)"
-fi
-
-if [ -n "$ECC_SKILLS_PATH" ]; then
-    echo "  ECC skills path:           $ECC_SKILLS_PATH"
-else
-    echo "  ECC skills path:           (not found)"
-fi
-echo "  ECC skills in context:     (check available skills list above)"
-echo ""
-
 # ── 6. Emit routing instruction ───────────────────────────────
 echo "═══════════════════════════════════════════════════════════"
 echo "  ROUTING INSTRUCTION"
@@ -267,72 +217,49 @@ echo ""
 
 case "$PHASE" in
     IDEATION)
-        echo "MODE: DISCOVER_AND_ROUTE"
-        echo "PHASE: IDEATION"
-        echo "ACTION: The user wants to brainstorm or start a new project."
-        echo "DISCOVER: Search BMAD manifests for brainstorming/ideation workflows (look for 'brainstorm', 'ideation', 'design-thinking' in descriptions)."
-        echo "FALLBACK: If no BMAD workflow found, use ECC's brainstorming skill or planner agent."
-        echo "ARTIFACT: Save output to _bmad-output/product-brief.md"
-        echo "NEXT_PHASE: PLANNING"
+        echo "MODE: BMAD"
+        echo "AGENT: Mary (Analyst) or Barry (Quick Flow)"
+        echo "ACTION: Start with brainstorming. Ask the user about their idea, then guide them through market/domain analysis using BMAD's analysis workflows."
+        echo "NEXT: Product brief creation"
         ;;
     ANALYSIS)
-        echo "MODE: DISCOVER_AND_ROUTE"
-        echo "PHASE: ANALYSIS"
-        echo "ACTION: Continue analysis toward a product brief."
-        echo "DISCOVER: Search BMAD manifests for analysis/research/brief-creation workflows."
-        echo "FALLBACK: If no BMAD workflow found, use ECC's planner agent."
-        echo "ARTIFACT: Save output to _bmad-output/product-brief.md"
-        echo "NEXT_PHASE: PLANNING"
+        echo "MODE: BMAD"
+        echo "AGENT: Mary (Analyst)"
+        echo "ACTION: Continue analysis phase. Help create a product brief using BMAD's brainstorming and research workflows."
+        echo "NEXT: PRD creation with John (PM)"
         ;;
     PLANNING)
-        echo "MODE: DISCOVER_AND_ROUTE"
-        echo "PHASE: PLANNING"
-        echo "ACTION: Product brief exists. Create a PRD."
-        echo "DISCOVER: Search BMAD manifests for PRD creation workflows (look for 'prd', 'requirements' in canonicalId or description)."
-        echo "FALLBACK: If no BMAD workflow found, use ECC's planner agent with the product brief as input."
-        echo "ARTIFACT: Save output to _bmad-output/prd.md"
-        echo "NEXT_PHASE: SOLUTIONING"
+        echo "MODE: BMAD"
+        echo "AGENT: John (PM)"
+        echo "ACTION: Product brief is ready. Guide the user through PRD creation using BMAD's elicitation workflow."
+        echo "NEXT: Architecture design with Winston (Architect)"
         ;;
     SOLUTIONING)
-        echo "MODE: DISCOVER_AND_ROUTE"
-        echo "PHASE: SOLUTIONING"
-        echo "ACTION: PRD exists. Design the architecture."
-        echo "DISCOVER: Search BMAD manifests for architecture/solutioning workflows (look for 'architecture', 'design' in canonicalId or description)."
-        echo "FALLBACK: If no BMAD workflow found, dispatch ECC's architect agent (model: opus)."
-        echo "ARTIFACT: Save output to _bmad-output/architecture.md"
-        echo "NEXT_PHASE: STORY_CREATION"
+        echo "MODE: BMAD"
+        echo "AGENT: Winston (Architect)"
+        echo "ACTION: PRD is ready. Guide architecture design, technology selection, and system design using BMAD's solutioning workflow."
+        echo "NEXT: Story creation with Bob (Scrum Master)"
         ;;
     STORY_CREATION)
-        echo "MODE: DISCOVER_AND_ROUTE"
-        echo "PHASE: STORY_CREATION"
-        echo "ACTION: Architecture exists. Create epics and stories."
-        echo "DISCOVER: Search BMAD manifests for story/epic creation workflows (look for 'stories', 'epics', 'story' in canonicalId or description)."
-        echo "FALLBACK: If no BMAD workflow found, break down architecture into stories manually following acceptance criteria format."
-        echo "ARTIFACT: Save stories to _bmad-output/stories/<epic>/<story>.md"
-        echo "NEXT_PHASE: READY_TO_BUILD"
+        echo "MODE: BMAD"
+        echo "AGENT: Bob (Scrum Master)"
+        echo "ACTION: Architecture is ready. Break down into epics and stories with acceptance criteria using BMAD's story creation workflow."
+        echo "NEXT: Implementation with ECC agents"
         ;;
     READY_TO_BUILD|BUILDING)
-        echo "MODE: DELEGATE_TO_ECC"
-        echo "PHASE: BUILDING"
-        echo "ACTION: Implementation phase. Delegate work to ECC agents for cost optimization."
-        echo "DELEGATE: Use ECC agents — they have model-optimized assignments:"
-        echo "  - planner (opus): Read stories, plan implementation approach"
-        echo "  - tdd-guide (sonnet): Write tests first, enforce TDD"
-        echo "  - code-reviewer (sonnet): Review code after implementation"
-        echo "  - security-reviewer (sonnet): Scan for security issues"
-        echo "  - doc-updater (haiku): Update documentation"
-        echo "MINIMIZE: Keep main session as thin orchestrator. Read story → dispatch agent → review output → report."
+        echo "MODE: ECC"
+        echo "AGENT: ECC agents (code-reviewer, security-reviewer, tdd-guide auto-activate)"
+        echo "ACTION: Implementation phase. ECC hooks will auto-format, type-check, and enforce quality. Use /plan for strategy, /tdd for test-driven development."
+        echo "ACTIVE: All ECC lifecycle hooks, security scanning, continuous learning"
         if [ "$HAS_STORIES" = true ]; then
-            echo "STORIES: Available in _bmad-output/stories/ ($STORY_COUNT found) — pass to agents as context"
+            echo "STORIES AVAILABLE: Yes — reference stories in _bmad-output/ for implementation context"
         fi
-        echo "ALSO_AVAILABLE: Search BMAD TEA module for test architecture needs (look for 'testarch' in manifests)."
         ;;
     BROWNFIELD_NO_DOCS)
-        echo "MODE: DELEGATE_TO_ECC"
-        echo "PHASE: BROWNFIELD"
-        echo "ACTION: Existing codebase without planning docs. Default to ECC agent delegation."
-        echo "DELEGATE: Same as BUILDING — use ECC agents with model-optimized assignments."
-        echo "OPTION: If user wants structure, search BMAD manifests for retroactive documentation workflows."
+        echo "MODE: ECC (primary), BMAD (optional)"
+        echo "AGENT: ECC agents for implementation"
+        echo "ACTION: Existing codebase detected without BMAD planning docs. Default to ECC mode for feature development. If user wants to add structure, suggest BMAD retroactive documentation."
+        echo "ACTIVE: All ECC lifecycle hooks, security scanning, continuous learning"
         ;;
     *)
         echo "MODE: ASK"

@@ -57,11 +57,8 @@ else
 fi
 
 # ECC check
-if [ -d "$HOME/.claude/agents" ] && [ -d "$HOME/.claude/rules" ]; then
-    ECC_AGENT_COUNT=$(ls "$HOME/.claude/agents"/*.md 2>/dev/null | wc -l | tr -d ' ')
-    echo -e "  ${GREEN}✓${NC} ECC components detected ($ECC_AGENT_COUNT agents available)"
-elif [ -d "$HOME/.claude/rules" ] || [ -f ".claude-plugin/plugin.json" ]; then
-    echo -e "  ${YELLOW}⚠${NC} ECC rules detected but no agents found. Consider reinstalling ECC for full agent support."
+if [ -d "$HOME/.claude/rules" ] || [ -f ".claude-plugin/plugin.json" ]; then
+    echo -e "  ${GREEN}✓${NC} ECC components detected"
 else
     echo -e "  ${RED}✗${NC} ECC not detected. Install it with:"
     echo "    git clone https://github.com/affaan-m/everything-claude-code.git"
@@ -70,11 +67,8 @@ else
 fi
 
 # BMAD check
-if [ -d "$HOME/.bmad/cache/external-modules" ]; then
-    BMAD_CMD_COUNT=$(find "$HOME/.bmad/cache/external-modules" -name "bmad-skill-manifest.yaml" 2>/dev/null | wc -l | tr -d ' ')
-    echo -e "  ${GREEN}✓${NC} BMAD-METHOD detected ($BMAD_CMD_COUNT commands available)"
-elif [ -d "_bmad" ] || [ -d ".bmad" ]; then
-    echo -e "  ${GREEN}✓${NC} BMAD-METHOD detected (project-level install)"
+if [ -d "_bmad" ] || [ -d ".bmad" ]; then
+    echo -e "  ${GREEN}✓${NC} BMAD-METHOD detected"
 else
     echo -e "  ${RED}✗${NC} BMAD-METHOD not detected. Install it with:"
     echo "    npx bmad-method install"
