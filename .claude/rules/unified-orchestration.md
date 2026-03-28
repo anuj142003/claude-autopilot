@@ -2,7 +2,7 @@
 
 ## Artifact Location Conventions
 
-All BMAD planning artifacts MUST be saved to `_bmad-output/` with these filenames:
+All planning artifacts MUST be saved to `_bmad-output/` with these filenames:
 
 - Product brief: `_bmad-output/product-brief.md`
 - PRD: `_bmad-output/prd.md`
@@ -16,22 +16,7 @@ This convention ensures the SessionStart hook can detect project state accuratel
 
 ## Phase Transition Signals
 
-When completing a BMAD planning phase, always:
+When completing a planning phase, always:
 1. Save the artifact to the correct location above
 2. Announce the transition explicitly to the user
-3. State what the next recommended phase is
-
-## Implementation Rules
-
-During ECC implementation mode:
-- Always check `_bmad-output/stories/` for acceptance criteria before implementing a feature
-- Reference the architecture document from `_bmad-output/architecture.md` for design decisions
-- Follow ECC language-specific rules (loaded from `~/.claude/rules/` or `.claude/rules/`)
-- Let ECC hooks handle formatting, type-checking, and security scanning automatically
-
-## Conflict Resolution
-
-If ECC rules and BMAD workflow guidance conflict:
-- For code style and quality: ECC rules take precedence (they're language-specific and more granular)
-- For process and methodology: BMAD workflows take precedence (they're designed for lifecycle management)
-- For security: ECC always takes precedence (it has runtime enforcement)
+3. Suggest running `/autopilot` to see next available actions
