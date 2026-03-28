@@ -54,9 +54,31 @@ ECC makes Claude write better code, but it doesn't help you figure out *what* to
 
 BMAD ensures you build the *right thing*, but it doesn't optimize the AI agent during coding.
 
+### Why Both? A Deeper Look
+
+BMAD and ECC aren't just different tools — they have fundamentally different execution models, and each is stronger where the other is weak.
+
+**BMAD workflows** execute as step-file sequences loaded inline in your main Claude session. Each step is a detailed markdown file (often 400+ lines) with menus, user checkpoints, and frontmatter-based state tracking. BMAD "agents" (like the Architect or Analyst) are actually persona instructions — Claude adopts a communication style and presents a capability menu, but it's the same Claude instance doing all the work in the same context window, on the same model.
+
+**ECC agents** are real sub-processes. When you dispatch an ECC agent (like `code-reviewer` or `tdd-guide`), Claude Code spawns a separate instance with a focused system prompt, running on a dedicated model. A code review runs on Sonnet instead of Opus. A doc update runs on Haiku. Each agent gets a fresh context — not polluted by your 50-message planning conversation.
+
+This creates a natural split:
+
+| Capability | BMAD | ECC |
+|-----------|------|-----|
+| Guided multi-step workflows | Strong (step files, menus, state tracking) | Weak (no guided flow) |
+| User interaction mid-task | Strong (A/P/C menus, approval gates) | Weak (fire-and-forget agents) |
+| Task execution quality | Average (same Claude, growing context) | Strong (fresh context, focused prompt) |
+| Cost efficiency | None (runs on main session model) | Strong (model-optimized per agent) |
+| Auto-formatting, type-checking | None | Strong (hooks run on every edit) |
+
+**BMAD excels at planning** — guiding you from idea to stories with structured workflows and user interaction at every step. **ECC excels at implementation** — delegating coding, testing, and review to specialized agents on cost-appropriate models, with hooks that enforce quality on every edit.
+
+Neither alone covers the full lifecycle. Together, you get guided planning that produces high-quality artifacts, followed by agent-driven implementation with cost optimization and automated quality gates.
+
 ### The Gap
 
-Neither framework knows about the other. If you install both, you need to manually decide when to use BMAD workflows vs ECC agents, which slash commands to run, and how to transition between planning and building. **claude-autopilot fills this gap.**
+Neither framework knows about the other. If you install both, you need to manually decide when to use BMAD workflows vs ECC agents, which slash commands to run, and how to transition between planning and building. **claude-autopilot fills this gap** — one menu that shows the right tool from either framework based on where you are.
 
 ## Quick Start
 
@@ -256,11 +278,11 @@ The main session handles only menu presentation and user interaction. Bulk work 
 
 ## How Is This Different From...
 
-**...just using ECC?** ECC optimizes agent behavior but doesn't guide you through planning. You get great code but might build the wrong thing.
+**...just using ECC?** ECC has powerful agents and hooks for implementation, but no guided workflow for planning. You'd need to know which of the 28+ agents to dispatch, when, and in what order. There's no step-by-step process that takes you from idea to stories — you jump straight to code.
 
-**...just using BMAD?** BMAD provides structure but doesn't optimize the AI agent during implementation. You get great plans but slower coding.
+**...just using BMAD?** BMAD has excellent guided workflows for planning, but its "agents" are just persona instructions — the same Claude instance role-playing different characters in the same session. During implementation, there's no agent delegation to cheaper models, no hooks for auto-formatting or type-checking, and no specialized sub-processes for code review or security scanning.
 
-**...using both manually?** You'd need to know which slash commands to run at each phase, handle conflicts between them, and remember to save artifacts in the right places. `/autopilot` discovers everything at runtime and presents one menu.
+**...using both manually?** You'd need to know that BMAD has 60+ workflows spread across 4 modules, which ones apply to your current phase, how to invoke them, and when to switch to ECC's agents for implementation. `/autopilot` discovers all of this at runtime and presents one menu — no framework knowledge required.
 
 ## Limitations
 
