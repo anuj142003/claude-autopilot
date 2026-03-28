@@ -29,9 +29,11 @@ NC='\033[0m' # No Color
 
 # ── Parse flags ───────────────────────────────────────────────
 FORCE=false
+AUTO_INSTALL=false
 for arg in "$@"; do
     case "$arg" in
         --force) FORCE=true ;;
+        --auto-install) AUTO_INSTALL=true ;;
     esac
 done
 
@@ -40,6 +42,20 @@ echo -e "${CYAN}═════════════════════�
 echo -e "${BOLD}  Unified ECC + BMAD Orchestrator — Installer${NC}"
 echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
 echo ""
+
+# ── Helper: ask yes/no ────────────────────────────────────────
+ask_install() {
+    local name="$1"
+    if [ "$AUTO_INSTALL" = true ]; then
+        return 0
+    fi
+    echo ""
+    read -r -p "  Would you like to install $name now? [y/N] " response
+    case "$response" in
+        [yY][eE][sS]|[yY]) return 0 ;;
+        *) return 1 ;;
+    esac
+}
 
 # ── Check prerequisites ───────────────────────────────────────
 echo -e "${BOLD}Checking prerequisites...${NC}"
@@ -51,19 +67,53 @@ if command -v claude &> /dev/null; then
     CLAUDE_VER=$(claude --version 2>/dev/null || echo "unknown")
     echo -e "  ${GREEN}✓${NC} Claude Code found: $CLAUDE_VER"
 else
-    echo -e "  ${RED}✗${NC} Claude Code not found. Install it with:"
-    echo "    npm install -g @anthropic-ai/claude-code"
-    MISSING+=("Claude Code")
+    echo -e "  ${RED}✗${NC} Claude Code not found"
+    if command -v npm &> /dev/null; then
+        if ask_install "Claude Code (via npm)"; then
+            echo -e "  ${CYAN}Installing Claude Code...${NC}"
+            npm install -g @anthropic-ai/claude-code && \
+                echo -e "  ${GREEN}✓${NC} Claude Code installed" || \
+                { echo -e "  ${RED}✗${NC} Installation failed"; MISSING+=("Claude Code"); }
+        else
+            echo "    Install manually: npm install -g @anthropic-ai/claude-code"
+            MISSING+=("Claude Code")
+        fi
+    else
+        echo "    npm not found. Install Node.js first, then: npm install -g @anthropic-ai/claude-code"
+        MISSING+=("Claude Code")
+    fi
 fi
 
 # ECC check
 if [ -d "$HOME/.claude/rules" ] || [ -f ".claude-plugin/plugin.json" ]; then
     echo -e "  ${GREEN}✓${NC} ECC components detected"
 else
-    echo -e "  ${RED}✗${NC} ECC not detected. Install it with:"
-    echo "    git clone https://github.com/affaan-m/everything-claude-code.git"
-    echo "    cd everything-claude-code && npm install && ./install.sh typescript"
-    MISSING+=("everything-claude-code (ECC)")
+    echo -e "  ${RED}✗${NC} ECC not detected"
+    if ask_install "everything-claude-code (ECC)"; then
+        echo -e "  ${CYAN}Installing ECC...${NC}"
+        TMPDIR_ECC=$(mktemp -d)
+        if git clone --depth 1 https://github.com/affaan-m/everything-claude-code.git "$TMPDIR_ECC/ecc" 2>/dev/null; then
+            cd "$TMPDIR_ECC/ecc" && bash install.sh 2>/dev/null
+            cd - > /dev/null
+            rm -rf "$TMPDIR_ECC"
+            if [ -d "$HOME/.claude/rules" ]; then
+                echo -e "  ${GREEN}✓${NC} ECC installed"
+            else
+                echo -e "  ${YELLOW}⚠${NC} ECC install ran but rules not found — check manually"
+                MISSING+=("everything-claude-code (ECC)")
+            fi
+        else
+            rm -rf "$TMPDIR_ECC"
+            echo -e "  ${RED}✗${NC} Failed to clone ECC repository"
+            echo "    Install manually: git clone https://github.com/affaan-m/everything-claude-code.git"
+            MISSING+=("everything-claude-code (ECC)")
+        fi
+    else
+        echo "    Install manually:"
+        echo "      git clone https://github.com/affaan-m/everything-claude-code.git"
+        echo "      cd everything-claude-code && bash install.sh"
+        MISSING+=("everything-claude-code (ECC)")
+    fi
 fi
 
 # BMAD check
@@ -72,9 +122,21 @@ if [ -d "$HOME/.bmad/cache/external-modules" ]; then
 elif [ -d "_bmad" ] || [ -d ".bmad" ]; then
     echo -e "  ${GREEN}✓${NC} BMAD-METHOD detected (project install)"
 else
-    echo -e "  ${RED}✗${NC} BMAD-METHOD not detected. Install it with:"
-    echo "    npx bmad-method install"
-    MISSING+=("BMAD-METHOD")
+    echo -e "  ${RED}✗${NC} BMAD-METHOD not detected"
+    if command -v npx &> /dev/null; then
+        if ask_install "BMAD-METHOD (via npx)"; then
+            echo -e "  ${CYAN}Installing BMAD-METHOD...${NC}"
+            npx bmad-method install && \
+                echo -e "  ${GREEN}✓${NC} BMAD-METHOD installed" || \
+                { echo -e "  ${RED}✗${NC} Installation failed"; MISSING+=("BMAD-METHOD"); }
+        else
+            echo "    Install manually: npx bmad-method install"
+            MISSING+=("BMAD-METHOD")
+        fi
+    else
+        echo "    npx not found. Install Node.js first, then: npx bmad-method install"
+        MISSING+=("BMAD-METHOD")
+    fi
 fi
 
 echo ""
@@ -87,7 +149,7 @@ if [ ${#MISSING[@]} -gt 0 ]; then
         echo -e "${YELLOW}Proceeding anyway (--force flag set)...${NC}"
         echo ""
     else
-        echo "  Install the missing prerequisites above, then re-run this script."
+        echo "  Fix the missing prerequisites above, then re-run this script."
         echo ""
         echo -e "  Or run with ${BOLD}--force${NC} to skip prerequisite checks:"
         echo "    bash install.sh --force"
