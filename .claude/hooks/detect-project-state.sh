@@ -209,63 +209,7 @@ echo "  Git branch:                $CURRENT_BRANCH"
 echo "  Recent commits:            $RECENT_COMMITS"
 echo ""
 
-# ── 6. Emit routing instruction ───────────────────────────────
+# ── 6. Emit nudge ─────────────────────────────────────────
 echo "═══════════════════════════════════════════════════════════"
-echo "  ROUTING INSTRUCTION"
-echo "═══════════════════════════════════════════════════════════"
-echo ""
-
-case "$PHASE" in
-    IDEATION)
-        echo "MODE: BMAD"
-        echo "AGENT: Mary (Analyst) or Barry (Quick Flow)"
-        echo "ACTION: Start with brainstorming. Ask the user about their idea, then guide them through market/domain analysis using BMAD's analysis workflows."
-        echo "NEXT: Product brief creation"
-        ;;
-    ANALYSIS)
-        echo "MODE: BMAD"
-        echo "AGENT: Mary (Analyst)"
-        echo "ACTION: Continue analysis phase. Help create a product brief using BMAD's brainstorming and research workflows."
-        echo "NEXT: PRD creation with John (PM)"
-        ;;
-    PLANNING)
-        echo "MODE: BMAD"
-        echo "AGENT: John (PM)"
-        echo "ACTION: Product brief is ready. Guide the user through PRD creation using BMAD's elicitation workflow."
-        echo "NEXT: Architecture design with Winston (Architect)"
-        ;;
-    SOLUTIONING)
-        echo "MODE: BMAD"
-        echo "AGENT: Winston (Architect)"
-        echo "ACTION: PRD is ready. Guide architecture design, technology selection, and system design using BMAD's solutioning workflow."
-        echo "NEXT: Story creation with Bob (Scrum Master)"
-        ;;
-    STORY_CREATION)
-        echo "MODE: BMAD"
-        echo "AGENT: Bob (Scrum Master)"
-        echo "ACTION: Architecture is ready. Break down into epics and stories with acceptance criteria using BMAD's story creation workflow."
-        echo "NEXT: Implementation with ECC agents"
-        ;;
-    READY_TO_BUILD|BUILDING)
-        echo "MODE: ECC"
-        echo "AGENT: ECC agents (code-reviewer, security-reviewer, tdd-guide auto-activate)"
-        echo "ACTION: Implementation phase. ECC hooks will auto-format, type-check, and enforce quality. Use /plan for strategy, /tdd for test-driven development."
-        echo "ACTIVE: All ECC lifecycle hooks, security scanning, continuous learning"
-        if [ "$HAS_STORIES" = true ]; then
-            echo "STORIES AVAILABLE: Yes — reference stories in _bmad-output/ for implementation context"
-        fi
-        ;;
-    BROWNFIELD_NO_DOCS)
-        echo "MODE: ECC (primary), BMAD (optional)"
-        echo "AGENT: ECC agents for implementation"
-        echo "ACTION: Existing codebase detected without BMAD planning docs. Default to ECC mode for feature development. If user wants to add structure, suggest BMAD retroactive documentation."
-        echo "ACTIVE: All ECC lifecycle hooks, security scanning, continuous learning"
-        ;;
-    *)
-        echo "MODE: ASK"
-        echo "ACTION: Unable to determine lifecycle phase. Ask the user what they'd like to do: plan a new feature (BMAD) or implement/fix code (ECC)."
-        ;;
-esac
-
-echo ""
+echo "  Type /autopilot to see available actions for this phase"
 echo "═══════════════════════════════════════════════════════════"
