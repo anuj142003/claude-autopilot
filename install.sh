@@ -239,7 +239,7 @@ if [ -f "$SCRIPT_DIR/.claude/commands/autopilot.md" ]; then
 fi
 
 # ── Install CLAUDE.md ─────────────────────────────────────────
-ORCHESTRATOR_MARKER="# Unified Development Orchestrator — ECC + BMAD-METHOD"
+ORCHESTRATOR_MARKER="# claude-autopilot"
 
 # Resolve real paths to prevent reading/writing the same file
 SOURCE_CLAUDE="$(cd "$SCRIPT_DIR" && pwd)/CLAUDE.md"
@@ -281,7 +281,8 @@ echo -e "  Files installed:"
 echo -e "    ${GREEN}CLAUDE.md${NC}                           — Orchestrator instructions"
 echo -e "    ${GREEN}.claude/settings.json${NC}               — SessionStart hook config"
 echo -e "    ${GREEN}.claude/hooks/detect-project-state.sh${NC} — State detection script"
-echo -e "    ${GREEN}.claude/rules/unified-orchestration.md${NC} — Routing rules"
+echo -e "    ${GREEN}.claude/commands/autopilot.md${NC}        — /autopilot command"
+echo -e "    ${GREEN}.claude/rules/unified-orchestration.md${NC} — Artifact conventions"
 echo -e "    ${GREEN}_bmad-output/${NC}                        — Artifact directories"
 echo ""
 echo -e "  ${BOLD}How it works:${NC}"

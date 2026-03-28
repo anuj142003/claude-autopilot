@@ -80,9 +80,20 @@ bash /path/to/claude-autopilot/install.sh
 
 # Or skip prerequisite checks if you'll install ECC/BMAD later
 bash /path/to/claude-autopilot/install.sh --force
+
+# Or auto-accept all prerequisite installation prompts
+bash /path/to/claude-autopilot/install.sh --auto-install
+```
+
+#### Uninstall
+
+```bash
+# Uninstall (removes autopilot files, keeps your artifacts)
+bash /path/to/claude-autopilot/uninstall.sh
 ```
 
 The installer will:
+- **Check prerequisites** and offer to install missing ones (Claude Code, ECC, BMAD) interactively
 - **Merge** hooks into your existing `.claude/settings.json` (preserving your permissions, env vars, etc.)
 - Copy the detection script and orchestration rules
 - Install the `/autopilot` command
@@ -215,6 +226,7 @@ The core orchestrator. A Claude Code command skill that implements the menu-driv
 claude-autopilot/
   CLAUDE.md                              # Minimal — mentions /autopilot exists
   install.sh                             # One-command installer with safety checks
+  uninstall.sh                           # Removes autopilot files, keeps artifacts
   .claude/
     settings.json                        # SessionStart hook configuration
     commands/
@@ -250,16 +262,25 @@ The main session handles only menu presentation and user interaction. Bulk work 
 
 **...using both manually?** You'd need to know which slash commands to run at each phase, handle conflicts between them, and remember to save artifacts in the right places. `/autopilot` discovers everything at runtime and presents one menu.
 
+## Limitations
+
+- **Explicit invocation required** — `/autopilot` is a command-based system; it must be explicitly typed at the start of each session to activate the menu
+- **Artifact path convention** — Phase detection depends on planning artifacts being saved to the `_bmad-output/` directory at the expected paths; artifacts saved elsewhere will not be detected
+- **Separate prerequisites** — BMAD and ECC must be installed independently (though the installer can walk you through it interactively)
+- **Runtime discovery** — The menu contents are discovered at runtime from installed frameworks, so what you see depends on what is currently installed
+
 ## Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 Ideas for contributions:
 
+- Improve `/autopilot` command menu UX
+- Better phase-to-BMAD-phase mapping in the CSV filter
+- Support for additional BMAD modules
+- Automated end-to-end testing of the `/autopilot` flow
 - Additional phase detection patterns (CI/CD status, branch naming)
 - Support for other AI coding frameworks beyond ECC and BMAD
-- Custom CLAUDE.md templates for specific project types (monorepo, microservices, etc.)
-- Integration tests that verify phase detection accuracy
 
 ## Credits
 

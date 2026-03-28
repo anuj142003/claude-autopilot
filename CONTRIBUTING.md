@@ -17,14 +17,15 @@ Thanks for your interest in contributing! This project bridges two major AI deve
 - Git branch pattern detection (feature branches, release branches)
 - Support for monorepo structures
 
+### `/autopilot` Command
+- Improve `/autopilot` command menu UX
+- Better phase-to-BMAD-phase mapping in the CSV filter
+- Support for additional BMAD modules
+- Automated end-to-end testing of the `/autopilot` flow
+
 ### Framework Support
 - Additional BMAD workflow mappings
-- Better ECC agent routing for specific languages
 - Support for other AI coding frameworks (Cursor rules, Windsurf, etc.)
-
-### Templates
-- CLAUDE.md templates for specific project types (API, frontend, mobile, data pipeline)
-- Industry-specific routing (fintech compliance, healthcare HIPAA, etc.)
 
 ### Documentation
 - Video walkthroughs of the full lifecycle
@@ -38,13 +39,14 @@ The detection script can be tested locally:
 ```bash
 cd examples/todo-app
 bash ../../.claude/hooks/detect-project-state.sh
-# Should output: PHASE=IDEATION
+# Should output lifecycle phase and end with:
+# "Type /autopilot to see available actions for this phase"
 
 # Create a fake PRD to test phase progression
 mkdir -p _bmad-output
 echo "# PRD" > _bmad-output/prd.md
 bash ../../.claude/hooks/detect-project-state.sh
-# Should output: PHASE=SOLUTIONING
+# Should output: LIFECYCLE PHASE: SOLUTIONING
 ```
 
 ## Code Style
