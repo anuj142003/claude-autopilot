@@ -67,8 +67,10 @@ else
 fi
 
 # BMAD check
-if [ -d "_bmad" ] || [ -d ".bmad" ]; then
-    echo -e "  ${GREEN}✓${NC} BMAD-METHOD detected"
+if [ -d "$HOME/.bmad/cache/external-modules" ]; then
+    echo -e "  ${GREEN}✓${NC} BMAD-METHOD detected (global install)"
+elif [ -d "_bmad" ] || [ -d ".bmad" ]; then
+    echo -e "  ${GREEN}✓${NC} BMAD-METHOD detected (project install)"
 else
     echo -e "  ${RED}✗${NC} BMAD-METHOD not detected. Install it with:"
     echo "    npx bmad-method install"
@@ -102,6 +104,7 @@ mkdir -p .claude/rules
 mkdir -p _bmad-output/stories
 mkdir -p _bmad-output/sprints
 mkdir -p _bmad-output/retros
+mkdir -p .claude/commands
 
 echo -e "  ${GREEN}✓${NC} Directories created"
 
@@ -167,6 +170,12 @@ if [ -f "$SCRIPT_DIR/.claude/rules/unified-orchestration.md" ]; then
     echo -e "  ${GREEN}✓${NC} Orchestration rules installed"
 fi
 
+# ── Install autopilot command ─────────────────────────────
+if [ -f "$SCRIPT_DIR/.claude/commands/autopilot.md" ]; then
+    cp "$SCRIPT_DIR/.claude/commands/autopilot.md" .claude/commands/autopilot.md
+    echo -e "  ${GREEN}✓${NC} Autopilot command installed (/autopilot)"
+fi
+
 # ── Install CLAUDE.md ─────────────────────────────────────────
 ORCHESTRATOR_MARKER="# Unified Development Orchestrator — ECC + BMAD-METHOD"
 
@@ -215,12 +224,10 @@ echo -e "    ${GREEN}_bmad-output/${NC}                        — Artifact dire
 echo ""
 echo -e "  ${BOLD}How it works:${NC}"
 echo -e "    1. Every time you start Claude Code, the hook detects your project phase"
-echo -e "    2. Claude sees the phase and automatically enters the right mode:"
-echo -e "       ${PURPLE}BMAD mode${NC} for planning (Ideation → PRD → Architecture → Stories)"
-echo -e "       ${BLUE}ECC mode${NC}  for building (Implementation → Review → Deploy)"
-echo -e "    3. Just tell Claude what you want — no slash commands needed"
+echo -e "    2. Type ${CYAN}/autopilot${NC} to see available actions from both BMAD and ECC"
+echo -e "    3. Pick an action — autopilot invokes the right framework for you"
 echo ""
 echo -e "  ${BOLD}Try it now:${NC}"
 echo -e "    ${CYAN}claude${NC}"
-echo -e "    Then say: ${CYAN}\"I want to build a task management app\"${NC}"
+echo -e "    Then type: ${CYAN}/autopilot${NC}"
 echo ""
