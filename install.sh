@@ -139,6 +139,15 @@ else
     fi
 fi
 
+# UI UX Pro Max check (optional — enhances design capabilities)
+if [ -d "$HOME/.claude/skills/ui-ux-pro-max" ] || [ -d ".claude/skills/ui-ux-pro-max" ]; then
+    echo -e "  ${GREEN}✓${NC} UI UX Pro Max detected"
+else
+    echo -e "  ${YELLOW}⚠${NC} UI UX Pro Max not detected (optional — adds design intelligence)"
+    echo "    Install: npm install -g uipro-cli && uipro init --ai claude"
+    echo "    Or: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill"
+fi
+
 echo ""
 
 # ── Abort if prerequisites are missing ────────────────────────
@@ -287,7 +296,7 @@ echo -e "    ${GREEN}_bmad-output/${NC}                        — Artifact dire
 echo ""
 echo -e "  ${BOLD}How it works:${NC}"
 echo -e "    1. Every time you start Claude Code, the hook detects your project phase"
-echo -e "    2. Type ${CYAN}/autopilot${NC} to see available actions from both BMAD and ECC"
+echo -e "    2. Type ${CYAN}/autopilot${NC} to see available actions from BMAD, ECC, and UI/UX skills"
 echo -e "    3. Pick an action — autopilot invokes the right framework for you"
 echo ""
 echo -e "  ${BOLD}Try it now:${NC}"

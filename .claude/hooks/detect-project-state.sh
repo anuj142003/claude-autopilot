@@ -88,6 +88,60 @@ if [ "$HAS_STORIES" = false ] && [ -d "_bmad-output/stories" ]; then
     fi
 fi
 
+# ── 1b. Detect UI/UX design artifacts ────────────────────────
+HAS_DESIGN_TOKENS=false
+HAS_BRAND_GUIDE=false
+HAS_COMPONENT_SPECS=false
+HAS_UIUX_SKILLS=false
+
+# Design token files
+for f in _bmad-output/design-tokens.md _bmad-output/design-system.md; do
+    if compgen -G "$f" > /dev/null 2>&1; then
+        HAS_DESIGN_TOKENS=true
+        BMAD_ARTIFACT_COUNT=$((BMAD_ARTIFACT_COUNT + 1))
+        break
+    fi
+done
+
+# Brand guide
+for f in _bmad-output/brand-guide.md _bmad-output/brand*.md; do
+    if compgen -G "$f" > /dev/null 2>&1; then
+        HAS_BRAND_GUIDE=true
+        BMAD_ARTIFACT_COUNT=$((BMAD_ARTIFACT_COUNT + 1))
+        break
+    fi
+done
+
+# Component specs
+for f in _bmad-output/component-specs.md _bmad-output/components*.md; do
+    if compgen -G "$f" > /dev/null 2>&1; then
+        HAS_COMPONENT_SPECS=true
+        BMAD_ARTIFACT_COUNT=$((BMAD_ARTIFACT_COUNT + 1))
+        break
+    fi
+done
+
+# UI/UX skills installed (project-level or global)
+if [ -d ".claude/skills/ui-ux-pro-max" ] || [ -d "$HOME/.claude/skills/ui-ux-pro-max" ]; then
+    HAS_UIUX_SKILLS=true
+fi
+
+# ── 1c. Detect non-BMAD planning artifacts ───────────────────
+# Users may create planning docs outside _bmad-output/ (e.g., via brainstorming,
+# manual planning, or other tools). Detect these so we can inform autopilot.
+HAS_INFORMAL_PLANS=false
+INFORMAL_PLAN_COUNT=0
+
+for d in docs/plans docs/design docs/planning design plans; do
+    if [ -d "$d" ]; then
+        count=$(find "$d" -name "*.md" -maxdepth 2 2>/dev/null | wc -l | tr -d ' ')
+        if [ "$count" -gt 0 ]; then
+            HAS_INFORMAL_PLANS=true
+            INFORMAL_PLAN_COUNT=$((INFORMAL_PLAN_COUNT + count))
+        fi
+    fi
+done
+
 # ── 2. Detect ECC artifacts ───────────────────────────────────
 HAS_ECC_HOOKS=false
 HAS_ECC_RULES=false
@@ -148,7 +202,10 @@ fi
 PHASE="UNKNOWN"
 PHASE_DETAIL=""
 
-if [ "$HAS_BMAD_DIR" = false ] && [ "$HAS_PRD" = false ] && [ "$HAS_SOURCE_CODE" = false ]; then
+if [ "$HAS_BMAD_DIR" = false ] && [ "$HAS_PRD" = false ] && [ "$HAS_SOURCE_CODE" = false ] && [ "$HAS_INFORMAL_PLANS" = true ]; then
+    PHASE="PLANNING_INFORMAL"
+    PHASE_DETAIL="Found $INFORMAL_PLAN_COUNT planning doc(s) outside _bmad-output/. Design work exists but not in BMAD format. Consider formalizing into a product brief or PRD, or proceed directly to implementation."
+elif [ "$HAS_BMAD_DIR" = false ] && [ "$HAS_PRD" = false ] && [ "$HAS_SOURCE_CODE" = false ]; then
     PHASE="IDEATION"
     PHASE_DETAIL="No project artifacts found. This appears to be a brand new project or idea."
 elif [ "$HAS_PRODUCT_BRIEF" = false ] && [ "$HAS_PRD" = false ]; then
@@ -182,6 +239,17 @@ else
     PHASE_DETAIL="Source code exists. Default to ECC implementation mode."
 fi
 
+# ── 4b. Add UI/UX hints when skills are available ────────────
+if [ "$HAS_UIUX_SKILLS" = true ]; then
+    case "$PHASE" in
+        PLANNING_INFORMAL|SOLUTIONING|STORY_CREATION|READY_TO_BUILD|BUILDING|BROWNFIELD_NO_DOCS)
+            if [ "$HAS_DESIGN_TOKENS" = false ]; then
+                PHASE_DETAIL="$PHASE_DETAIL UI/UX design skills are available — consider generating design tokens, brand guide, or component specs."
+            fi
+            ;;
+    esac
+fi
+
 # ── 5. Output structured state ────────────────────────────────
 echo "LIFECYCLE PHASE: $PHASE"
 echo "DETAIL: $PHASE_DETAIL"
@@ -200,6 +268,15 @@ echo "  Hooks installed:           $HAS_ECC_HOOKS"
 echo "  Rules installed:           $HAS_ECC_RULES"
 echo "  Skills installed:          $HAS_ECC_SKILLS"
 echo "  Learned instincts:         $HAS_INSTINCTS"
+echo ""
+echo "── UI/UX Design ──"
+echo "  UI/UX skills installed:    $HAS_UIUX_SKILLS"
+echo "  Design tokens:             $HAS_DESIGN_TOKENS"
+echo "  Brand guide:               $HAS_BRAND_GUIDE"
+echo "  Component specs:           $HAS_COMPONENT_SPECS"
+echo ""
+echo "── Informal Planning ──"
+echo "  Non-BMAD plan docs:       $HAS_INFORMAL_PLANS (count: $INFORMAL_PLAN_COUNT)"
 echo ""
 echo "── Project State ──"
 echo "  Source code:               $HAS_SOURCE_CODE"

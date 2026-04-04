@@ -1,10 +1,10 @@
 <p align="center">
   <h1 align="center">claude-autopilot</h1>
   <p align="center">
-    <strong>Type <code>/autopilot</code> to see available actions from BMAD and ECC based on your project phase</strong>
+    <strong>Type <code>/autopilot</code> to see available actions from BMAD, ECC, and UI/UX skills based on your project phase</strong>
   </p>
   <p align="center">
-    A menu-driven orchestrator that discovers commands at runtime from <a href="https://github.com/affaan-m/everything-claude-code">everything-claude-code</a> and <a href="https://github.com/bmad-code-org/BMAD-METHOD">BMAD-METHOD</a>, then lets you pick what to do next.
+    A menu-driven orchestrator that discovers commands at runtime from <a href="https://github.com/affaan-m/everything-claude-code">everything-claude-code</a>, <a href="https://github.com/bmad-code-org/BMAD-METHOD">BMAD-METHOD</a>, and <a href="https://github.com/nextlevelbuilder/ui-ux-pro-max-skill">UI UX Pro Max</a>, then lets you pick what to do next.
   </p>
 </p>
 
@@ -21,10 +21,10 @@
 
 ## What is claude-autopilot?
 
-**claude-autopilot is NOT a fork or bundle of ECC or BMAD.** It does not include either framework — you install them separately. What it provides is a thin **orchestration layer** that:
+**claude-autopilot is NOT a fork or bundle of ECC, BMAD, or UI UX Pro Max.** It does not include any framework — you install them separately. What it provides is a thin **orchestration layer** that:
 
 1. **Detects** your project's lifecycle phase on every session start
-2. **Discovers** available commands from both frameworks at runtime
+2. **Discovers** available commands from all installed frameworks at runtime
 3. **Presents** a unified menu of phase-relevant actions
 4. **Executes** your choice by invoking the right framework
 5. **Loops** — after each action completes, re-detects the phase and shows updated options
@@ -54,7 +54,18 @@ ECC makes Claude write better code, but it doesn't help you figure out *what* to
 
 BMAD ensures you build the *right thing*, but it doesn't optimize the AI agent during coding.
 
-### Why Both? A Deeper Look
+### UI UX Pro Max (Optional)
+
+[UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) by NextLevelBuilder is a skill suite that brings **design intelligence** to Claude Code. It installs per-project or globally into `~/.claude/skills/` and provides:
+
+- **Style Search** — BM25 search engine across 67 UI styles, 161 color palettes, 57 font pairings, 99 UX guidelines
+- **Design Tokens** — Three-layer architecture (primitive, semantic, component) with CSS variables and Tailwind config
+- **Brand Identity** — Voice, visual identity, and messaging framework generation
+- **UI Styling** — shadcn/ui + Tailwind CSS patterns with accessibility and dark mode support
+
+UI UX Pro Max fills the design gap between BMAD's planning outputs and ECC's implementation agents. It is optional — autopilot works fine without it, but surfaces its skills when detected.
+
+### Why All Three? A Deeper Look
 
 BMAD and ECC aren't just different tools — they have fundamentally different execution models, and each is stronger where the other is weak.
 
@@ -64,21 +75,23 @@ BMAD and ECC aren't just different tools — they have fundamentally different e
 
 This creates a natural split:
 
-| Capability | BMAD | ECC |
-|-----------|------|-----|
-| Guided multi-step workflows | Strong (step files, menus, state tracking) | Weak (no guided flow) |
-| User interaction mid-task | Strong (A/P/C menus, approval gates) | Weak (fire-and-forget agents) |
-| Task execution quality | Average (same Claude, growing context) | Strong (fresh context, focused prompt) |
-| Cost efficiency | None (runs on main session model) | Strong (model-optimized per agent) |
-| Auto-formatting, type-checking | None | Strong (hooks run on every edit) |
+| Capability | BMAD | ECC | UI UX Pro Max |
+|-----------|------|-----|---------------|
+| Guided multi-step workflows | Strong (step files, menus, state tracking) | Weak (no guided flow) | None |
+| User interaction mid-task | Strong (A/P/C menus, approval gates) | Weak (fire-and-forget agents) | None |
+| Task execution quality | Average (same Claude, growing context) | Strong (fresh context, focused prompt) | Strong (data-driven design decisions) |
+| Cost efficiency | None (runs on main session model) | Strong (model-optimized per agent) | Strong (skills run inline) |
+| Auto-formatting, type-checking | None | Strong (hooks run on every edit) | None |
+| Design system generation | None | None | Strong (67 styles, 161 palettes, 57 fonts) |
+| Brand identity & UX guidelines | None | None | Strong (99 UX guidelines, anti-patterns) |
 
-**BMAD excels at planning** — guiding you from idea to stories with structured workflows and user interaction at every step. **ECC excels at implementation** — delegating coding, testing, and review to specialized agents on cost-appropriate models, with hooks that enforce quality on every edit.
+**BMAD excels at planning** — guiding you from idea to stories with structured workflows and user interaction at every step. **ECC excels at implementation** — delegating coding, testing, and review to specialized agents on cost-appropriate models, with hooks that enforce quality on every edit. **UI UX Pro Max excels at design** — providing data-driven design decisions with industry-specific reasoning rules across styles, colors, typography, and UX guidelines.
 
-Neither alone covers the full lifecycle. Together, you get guided planning that produces high-quality artifacts, followed by agent-driven implementation with cost optimization and automated quality gates.
+No single framework covers the full lifecycle. Together, you get guided planning that produces high-quality artifacts, data-driven design systems, and agent-driven implementation with cost optimization and automated quality gates.
 
 ### The Gap
 
-Neither framework knows about the other. If you install both, you need to manually decide when to use BMAD workflows vs ECC agents, which slash commands to run, and how to transition between planning and building. **claude-autopilot fills this gap** — one menu that shows the right tool from either framework based on where you are.
+None of these frameworks knows about the others. If you install all three, you need to manually decide when to use BMAD workflows vs ECC agents vs UI/UX skills, which slash commands to run, and how to transition between planning, design, and building. **claude-autopilot fills this gap** — one menu that shows the right tool from any installed framework based on where you are.
 
 ## Quick Start
 
@@ -87,6 +100,7 @@ Neither framework knows about the other. If you install both, you need to manual
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) >= v2.1.0
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) installed
 - [BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD) installed (`npx bmad-method install`)
+- [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) *(optional)* — adds design intelligence (`npm install -g uipro-cli && uipro init --ai claude`)
 
 ### Install
 
@@ -158,6 +172,11 @@ ECC Agents:
   [architect]        System design decisions (model: sonnet)
   [security-reviewer] Security analysis (model: sonnet)
 
+UI/UX Design Skills:
+  [ui-ux-pro-max]    Design intelligence — styles, palettes, fonts, UX guidelines
+  [design-system]    Generate design tokens (primitive, semantic, component)
+  [brand]            Brand voice and visual identity framework
+
 Other:
   [H] Show ALL available commands (all phases)
   [Q] Exit autopilot
@@ -179,11 +198,14 @@ You type: /autopilot
      |
      v
 [2. Discover Commands]
-     |  BMAD: Parse ~/.bmad/cache/**/module-help.csv
-     |        Filter rows by phase column
-     |  ECC:  Glob ~/.claude/agents/*.md
-     |        Read frontmatter (name, description, model)
-     |        Filter by phase relevance
+     |  BMAD:  Parse ~/.bmad/cache/**/module-help.csv
+     |         Filter rows by phase column
+     |  ECC:   Glob ~/.claude/agents/*.md
+     |         Read frontmatter (name, description, model)
+     |         Filter by phase relevance
+     |  UI/UX: Glob ~/.claude/skills/*/SKILL.md
+     |         Discover installed design skills
+     |         Filter by phase relevance
      |
      v
 [3. Present Menu]
@@ -194,6 +216,7 @@ You type: /autopilot
 [4. Execute Choice]
      |  BMAD workflow → invoke via Skill tool
      |  ECC agent → dispatch via Agent tool
+     |  UI/UX skill → invoke via Skill tool
      |
      v
 [5. Loop]
@@ -207,6 +230,7 @@ The detection script inspects your project directory and determines the lifecycl
 | Phase | Trigger | Available Actions |
 |-------|---------|-------------------|
 | `IDEATION` | No artifacts, no source code | BMAD brainstorming and ideation workflows |
+| `PLANNING_INFORMAL` | No BMAD artifacts, but docs exist in `docs/`, `plans/`, etc. | Design work exists outside BMAD format — build from it, formalize it, or enhance with UI/UX skills |
 | `ANALYSIS` | BMAD dir exists, no brief/PRD | BMAD analysis and research workflows |
 | `PLANNING` | Product brief exists, no PRD | BMAD requirements and PRD creation workflows |
 | `SOLUTIONING` | PRD exists, no architecture doc | BMAD architecture and design workflows |
@@ -225,6 +249,9 @@ _bmad-output/
   prd.md                  # PLANNING -> SOLUTIONING
   architecture.md         # SOLUTIONING -> STORY_CREATION
   ux-design.md            # Optional
+  design-tokens.md        # Optional (UI UX Pro Max)
+  brand-guide.md          # Optional (UI UX Pro Max)
+  component-specs.md      # Optional (UI UX Pro Max)
   stories/                # STORY_CREATION -> READY_TO_BUILD
     epic-name/
       story-name.md
@@ -282,13 +309,15 @@ The main session handles only menu presentation and user interaction. Bulk work 
 
 **...just using BMAD?** BMAD has excellent guided workflows for planning, but its "agents" are just persona instructions — the same Claude instance role-playing different characters in the same session. During implementation, there's no agent delegation to cheaper models, no hooks for auto-formatting or type-checking, and no specialized sub-processes for code review or security scanning.
 
-**...using both manually?** You'd need to know that BMAD has 60+ workflows spread across 4 modules, which ones apply to your current phase, how to invoke them, and when to switch to ECC's agents for implementation. `/autopilot` discovers all of this at runtime and presents one menu — no framework knowledge required.
+**...just using UI UX Pro Max?** Great design intelligence, but no guided planning workflow and no implementation agents. You'd get a design system but need to figure out the rest yourself.
+
+**...using all three manually?** You'd need to know that BMAD has 60+ workflows spread across 4 modules, ECC has 28+ agents, and UI UX Pro Max has 7 design skills — which ones apply to your current phase, how to invoke them, and when to switch between planning, design, and building. `/autopilot` discovers all of this at runtime and presents one menu — no framework knowledge required.
 
 ## Limitations
 
 - **Explicit invocation required** — `/autopilot` is a command-based system; it must be explicitly typed at the start of each session to activate the menu
 - **Artifact path convention** — Phase detection depends on planning artifacts being saved to the `_bmad-output/` directory at the expected paths; artifacts saved elsewhere will not be detected
-- **Separate prerequisites** — BMAD and ECC must be installed independently (though the installer can walk you through it interactively)
+- **Separate prerequisites** — BMAD, ECC, and UI UX Pro Max must be installed independently (though the installer can walk you through BMAD and ECC interactively)
 - **Runtime discovery** — The menu contents are discovered at runtime from installed frameworks, so what you see depends on what is currently installed
 
 ## Contributing
@@ -302,12 +331,13 @@ Ideas for contributions:
 - Support for additional BMAD modules
 - Automated end-to-end testing of the `/autopilot` flow
 - Additional phase detection patterns (CI/CD status, branch naming)
-- Support for other AI coding frameworks beyond ECC and BMAD
+- Support for additional AI coding frameworks
 
 ## Credits
 
 - [everything-claude-code](https://github.com/affaan-m/everything-claude-code) by Affaan Mustafa — the agent optimization layer
 - [BMAD-METHOD](https://github.com/bmad-code-org/BMAD-METHOD) by Brian (BMad) Madison — the structured methodology layer
+- [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) by NextLevelBuilder — the design intelligence layer
 - Analysis and orchestration by [Anuj Saxena](https://github.com/anuj142003)
 
 ## License
