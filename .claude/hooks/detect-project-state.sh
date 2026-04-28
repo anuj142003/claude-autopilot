@@ -168,16 +168,45 @@ fi
 HAS_SOURCE_CODE=false
 HAS_TESTS=false
 HAS_PACKAGE_JSON=false
+HAS_SUBSTANTIAL_README=false
 RECENT_COMMITS=0
 CURRENT_BRANCH="unknown"
 
-# Source code detection
-for d in src/ app/ lib/ pkg/ cmd/ internal/; do
+# Source code detection — conventional source directories
+for d in src/ app/ lib/ pkg/ cmd/ internal/ scripts/ bin/ examples/; do
     if [ -d "$d" ]; then
         HAS_SOURCE_CODE=true
         break
     fi
 done
+
+# Top-level executable scripts (shell/python/js projects without src/)
+if [ "$HAS_SOURCE_CODE" = false ]; then
+    for pattern in "*.sh" "*.py" "*.js" "*.ts" "*.rb"; do
+        if compgen -G "$pattern" > /dev/null 2>&1; then
+            HAS_SOURCE_CODE=true
+            break
+        fi
+    done
+fi
+
+# Claude-tooling projects: .claude/hooks or .claude/commands with content
+# (e.g. claude-autopilot itself, ECC config repos)
+if [ "$HAS_SOURCE_CODE" = false ]; then
+    if [ -d ".claude/hooks" ] && [ -n "$(ls -A .claude/hooks 2>/dev/null)" ]; then
+        HAS_SOURCE_CODE=true
+    elif [ -d ".claude/commands" ] && [ -n "$(ls -A .claude/commands 2>/dev/null)" ]; then
+        HAS_SOURCE_CODE=true
+    fi
+fi
+
+# Substantial README is evidence of an active project (>2KB)
+if [ -f "README.md" ]; then
+    readme_size=$(wc -c < README.md 2>/dev/null | tr -d ' ')
+    if [ "${readme_size:-0}" -gt 2048 ]; then
+        HAS_SUBSTANTIAL_README=true
+    fi
+fi
 
 # Test detection
 for d in tests/ test/ __tests__/ spec/ *_test.go; do
@@ -206,8 +235,15 @@ if [ "$HAS_BMAD_DIR" = false ] && [ "$HAS_PRD" = false ] && [ "$HAS_SOURCE_CODE"
     PHASE="PLANNING_INFORMAL"
     PHASE_DETAIL="Found $INFORMAL_PLAN_COUNT planning doc(s) outside _bmad-output/. Design work exists but not in BMAD format. Consider formalizing into a product brief or PRD, or proceed directly to implementation."
 elif [ "$HAS_BMAD_DIR" = false ] && [ "$HAS_PRD" = false ] && [ "$HAS_SOURCE_CODE" = false ]; then
-    PHASE="IDEATION"
-    PHASE_DETAIL="No project artifacts found. This appears to be a brand new project or idea."
+    # Anti-IDEATION signals: a project with real git history or a substantial README
+    # is an active codebase even if it lacks conventional src/ layout.
+    if [ "$RECENT_COMMITS" -gt 3 ] || [ "$HAS_SUBSTANTIAL_README" = true ]; then
+        PHASE="BROWNFIELD_NO_DOCS"
+        PHASE_DETAIL="Active project ($RECENT_COMMITS commits, README present) without BMAD planning artifacts and without a conventional source layout. Likely a config/tooling repo. Could benefit from retroactive documentation, or proceed with ECC."
+    else
+        PHASE="IDEATION"
+        PHASE_DETAIL="No project artifacts found. This appears to be a brand new project or idea."
+    fi
 elif [ "$HAS_PRODUCT_BRIEF" = false ] && [ "$HAS_PRD" = false ]; then
     if [ "$HAS_SOURCE_CODE" = true ]; then
         PHASE="BROWNFIELD_NO_DOCS"
@@ -282,6 +318,7 @@ echo "── Project State ──"
 echo "  Source code:               $HAS_SOURCE_CODE"
 echo "  Tests:                     $HAS_TESTS"
 echo "  Package manager:           $HAS_PACKAGE_JSON"
+echo "  Substantial README:        $HAS_SUBSTANTIAL_README"
 echo "  Git branch:                $CURRENT_BRANCH"
 echo "  Recent commits:            $RECENT_COMMITS"
 echo ""
